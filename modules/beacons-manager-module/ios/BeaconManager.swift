@@ -12,8 +12,8 @@ import UIKit
 
 class BeaconManager: NSObject, CLLocationManagerDelegate {
     
-    static var sharedInsstance = BeaconManager()
-    
+//    static var sharedInsstance = BeaconManager()
+
     let locationManager: CLLocationManager
     let region: CLBeaconRegion
     
@@ -174,15 +174,3 @@ class BeaconManager: NSObject, CLLocationManagerDelegate {
     
 }
 
-/*
-
-В общем я чекнул весь код на свивте че там вообще происходит, по сути то как они юзают модуль BeaconManager описано в протоколе BeaconManagerDelegate а юзаеться это все во ViewController, по сути этот протокол и описывает интерфейс взаимодействия с нашим модулем выглядит он так
-protocol BeaconManagerDelegate {    
-    func didEnterBeaconRegion(_ region: CLBeaconRegion)
-    func didFindBeacon(_ beaconId: String)
-    func didLoseBeacon(_ beaconId: String)
-    func didExitBeaconRegion(_ region: CLBeaconRegion)
-}
-я думаю попробовать оживить сам модуль и написать своь реализацию этого протокола, за место их контролера, которая и будет реализовывать эти методы в js, по идее этого должно быть достаточно, типо из js у нас буду доступны методы которые выше
-
-*/
