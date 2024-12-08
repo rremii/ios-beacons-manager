@@ -1,14 +1,14 @@
 import { requireNativeModule } from "expo-modules-core";
 
-const BeaconsManagerModule = requireNativeModule("BeaconsManagerModule");
+const BeaconsManager = requireNativeModule("BeaconsManagerModule");
 
-console.log(BeaconsManagerModule);
+console.log(BeaconsManager);
 
-BeaconsManagerModule.addListener("onInitialize", (event: any) => {
+BeaconsManager.addListener("onInitialize", (event: any) => {
   console.log(event);
 });
 
-export default BeaconsManagerModule;
+export default BeaconsManager;
 
 // export const getMessageAsync = async () => {
 //   return await BeaconsManagerModule.initialize();
