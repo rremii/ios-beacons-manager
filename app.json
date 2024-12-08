@@ -10,7 +10,12 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.remii.test-native-modules"
+      "bundleIdentifier": "com.remii.test-native-modules",
+      "infoPlist": {
+        "UIBackgroundModes": ["location"],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Zipp to use your location",
+        "NSLocationAlwaysUsageDescription": "Allow Zipp to use your location"
+      }
     },
     "android": {
       "adaptiveIcon": {
