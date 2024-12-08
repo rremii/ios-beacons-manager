@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "web", "android"],
+  "apple": {
+    "modules": ["BeaconsManagerModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.beaconsmanagermodule.BeaconsManagerModule"]
+  }
+}
