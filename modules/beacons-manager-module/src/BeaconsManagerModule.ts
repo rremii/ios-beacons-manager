@@ -16,7 +16,3 @@ BeaconsManager.addListener("didFindBeacon", (event: any) => {
 });
 
 export default BeaconsManager;
-
-// export const getMessageAsync = async () => {
-//   return await BeaconsManagerModule.initialize();
-// };

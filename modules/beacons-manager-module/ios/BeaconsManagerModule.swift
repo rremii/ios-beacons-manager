@@ -20,7 +20,6 @@ public class BeaconsManagerModule: Module,BeaconManagerDelegate {
         BeaconManager.sharedInstance.startMonitoringBeacons()
         BeaconManager.sharedInstance.delegate = self
         
-        
       
         self.sendEvent("onInitialize", ["message": "Module initialized"])
     }

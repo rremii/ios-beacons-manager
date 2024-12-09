@@ -29,9 +29,6 @@ import CoreLocation
   
   public func startMonitoringBeacons() {
     if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
-
-       
-
         let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
         let beaconRegion = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
 
