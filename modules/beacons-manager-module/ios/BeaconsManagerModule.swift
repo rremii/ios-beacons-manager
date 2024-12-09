@@ -17,7 +17,7 @@ public class BeaconsManagerModule: Module,BeaconManagerDelegate {
     AsyncFunction("initialize") {
       
       
-        BeaconManager.sharedInstance.startMonitoringBeacons()
+        // BeaconManager.sharedInstance.startMonitoringBeacons()
         BeaconManager.sharedInstance.delegate = self
         
       
