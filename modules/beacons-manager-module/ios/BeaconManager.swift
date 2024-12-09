@@ -12,12 +12,6 @@ import CoreLocation
     locationManager.requestAlwaysAuthorization()
   }
 
-  func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus){
-        if status == .authorizedAlways {
-            rangeBeacons()
-        }
-  }
-
 
   func rangeBeacons() {
         let uuid = UUID(uuidString: "DE62C6D0-005E-4F32-B019-AA45124005CA")!
@@ -30,17 +24,22 @@ import CoreLocation
         locationManager.startRangingBeacons(in: region)
   }
     
-  func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+ public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if status == .authorizedAlways {
             rangeBeacons()
         }
   }
     
-  func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
+ public func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
         print("beacons: ", beacons)
-        
-        delegate.didFindBeacon(beacons.first.uuid.uuidString)
-
+     
+        if let nearestBeacon = beacons.first {
+            print("Nearest beacon: \(nearestBeacon)")
+           
+            delegate?.didFindBeacon(nearestBeacon.uuid.uuidString)
+        }
+    
+    
         // guard let discoveredBeaconProximity = beacons.first?.proximity else { print("Couldn't find the beacon!"); return }
         
         // let backgroundColor:UIColor = {
@@ -57,15 +56,15 @@ import CoreLocation
 
   
   
-  // public func startMonitoringBeacons() {
-  //   if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
-  //       let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
-  //       let beaconRegion = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
-
-  //       locationManager.startMonitoring(for: beaconRegion)
-  //       locationManager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!))
-  //   }
-  // }
+//   public func startMonitoringBeacons() {
+//     if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+//         let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
+//         let beaconRegion = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
+//
+//         locationManager.startMonitoring(for: beaconRegion)
+//         locationManager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!))
+//     }
+//   }
   
   // public func stopMonitoringBeacons() {
   //   if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
