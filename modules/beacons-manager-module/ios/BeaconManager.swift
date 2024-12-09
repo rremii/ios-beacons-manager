@@ -1,176 +1,97 @@
-//
-//  BeaconManager.h
-//  ZippBell
-//
-//  Created by Tijn Kooijmans on 20/06/16.
-//  Copyright © 2016 Studio Sophisti. All rights reserved.
-//
-
 import Foundation
 import CoreLocation
-import UIKit
 
-class BeaconManager: NSObject, CLLocationManagerDelegate {
-    
-//    static var sharedInsstance = BeaconManager()
+@objc public class BeaconManager: NSObject, CLLocationManagerDelegate {
+  private var locationManager: CLLocationManager!
+  public static let sharedInstance = BeaconManager()
+  var delegate: BeaconManagerDelegate?
 
-    let locationManager: CLLocationManager
-    let region: CLBeaconRegion
+
     
-    var currentRegions = [String: CLBeaconRegion]()
+
+  override private init() {
+    super.init()
+    locationManager = CLLocationManager()
+    locationManager.delegate = self
+    locationManager.requestAlwaysAuthorization()
+    locationManager.allowsBackgroundLocationUpdates = true
+
     
-    var isRanging = false
-    var beaconsInRange = [String: CLBeacon]()
+
+    let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
+    let region = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
     
-    var bgStopTimer: Timer?
-    var rangingTask: UIBackgroundTaskIdentifier = UIBackgroundTaskIdentifier.invalid
-    
-    var isMonitoringBeacons: Bool = false
-    
-    var delegate: BeaconManagerDelegate?
-    
-    override init() {
+         
             
-        locationManager = CLLocationManager()
+    region.notifyOnEntry = true
+    region.notifyOnExit = true
+  }
+  
+  public func startMonitoringBeacons() {
+    if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+
+       
 
         let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
-        region = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
-            
-        super.init()
-            
-        locationManager.delegate = self
-        locationManager.requestAlwaysAuthorization()
-        locationManager.allowsBackgroundLocationUpdates = true
-            
-        region.notifyOnEntry = true
-        region.notifyOnExit = true
-    }
+        let beaconRegion = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
 
-    func startMonitoringBeacons() {
-            
-        locationManager.startMonitoring(for: region)
-//        delay(1) {
-//            self.locationManager.requestState(for: self.region)
-//        }
-        
-        isMonitoringBeacons = true
+        locationManager.startMonitoring(for: beaconRegion)
+        locationManager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!))
     }
-    
-    func stopMonitoringBeacons() {
+  }
+  
+  public func stopMonitoringBeacons() {
+    if CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self) {
+
+ 
         let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
-        
-        locationManager.stopRangingBeacons(satisfying: beaconConstraint)
-        locationManager.stopMonitoring(for: region)
-        
-        isMonitoringBeacons = false
-    }
-    
-    func stopBackgroundTask() {
-        bgStopTimer = nil
-        
-        NSLog("Stop ranging beacons")
-        
-        let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
-        self.locationManager.stopRangingBeacons(satisfying: beaconConstraint)
+        let beaconRegion = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
 
-        isRanging = false
-            
-        NSLog("End background task")
-        UIApplication.shared.endBackgroundTask(rangingTask)
+        locationManager.stopMonitoring(for: beaconRegion)
+        locationManager.stopRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!))
     }
-    
-    fileprivate func enterBeaconRegion(_ region: CLBeaconRegion) {
-        
-        let uuidString = region.uuid.uuidString
-        
-        delegate?.didEnterBeaconRegion(region)
-        
-        NSLog("Enter beacon range")
-        
-        currentRegions[uuidString] = region
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, didStartMonitoringFor region: CLRegion) {
+    print("Started monitoring region: \(region.identifier)")
+    locationManager.requestState(for: region)
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
+    if state == .inside {
+      if let beaconRegion = region as? CLBeaconRegion {
+        locationManager.startRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconRegion.uuid))
+      }
+    } else {
+      if let beaconRegion = region as? CLBeaconRegion {
+        locationManager.stopRangingBeacons(satisfying: CLBeaconIdentityConstraint(uuid: beaconRegion.uuid))
+      }
     }
-
-    fileprivate func exitBeaconRegion(_ region: CLBeaconRegion) {
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, didRange beacons: [CLBeacon], satisfying beaconIdentityConstraint: CLBeaconIdentityConstraint) {
+    if let nearestBeacon = beacons.first {
+        print("Nearest beacon: \(nearestBeacon)")
         
-        let uuidString = region.uuid.uuidString
-        
-        currentRegions[uuidString] = nil
-        
-        delegate?.didExitBeaconRegion(region)
-        
-        NSLog("Exit beacon range")
-        
-        if currentRegions.isEmpty {
-            isRanging = false
-            
-            for key in beaconsInRange.keys {
-                lostBeacon(beaconsInRange[key]!)
-                beaconsInRange[key] = nil
-            }
-        }
+        delegate?.didFindBeacon(nearestBeacon.uuid.uuidString)
     }
-
-    
-    fileprivate func foundBeacon(_ beacon: CLBeacon) {
-        let key = beacon.key
-        NSLog("Found beacon: %@", key)
-        
-        delegate?.didFindBeacon(key)
-    }
-    
-    fileprivate func lostBeacon(_ beacon: CLBeacon) {
-        let key = beacon.key
-        NSLog("Lost beacon: %@", key)
-        
-        delegate?.didLoseBeacon(key)
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-//        if let beaconRegion = region as? CLBeaconRegion {
-//            NSLog("Enter beacon region: %@", beaconRegion.proximityUUID.uuidString)
-//            enterBeaconRegion(beaconRegion)
-//        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-//        if let beaconRegion = region as? CLBeaconRegion {
-//            NSLog("Exit beacon region: %@", beaconRegion.proximityUUID.uuidString)
-//            exitBeaconRegion(beaconRegion)
-//        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
-        if let beaconRegion = region as? CLBeaconRegion {
-            if state == .inside {
-                NSLog("Inside beacon region: %@", beaconRegion.uuid.uuidString)
-                enterBeaconRegion(beaconRegion)
-                
-            } else if state == .outside {
-                NSLog("Outside beacon region: %@", beaconRegion.uuid.uuidString)
-                exitBeaconRegion(beaconRegion)
-            }
-        }
-    }
-
-    
-    func locationManager(_ manager: CLLocationManager, didRangeBeacons beacons: [CLBeacon], in region: CLBeaconRegion) {
-        for beacon in beacons {
-            if beaconsInRange[beacon.key] == nil {
-                beaconsInRange[beacon.key] = beacon
-                foundBeacon(beacon)
-            }
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didStartMonitoringFor region: CLRegion) {
-        if let _ = region as? CLBeaconRegion {
-            NSLog("did start monitoring for beacon")
-        }
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        NSLog("location manager error: \(error.localizedDescription)")
-    }
-    
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    print("Entered region: \(region.identifier)")
+    delegate?.didEnterBeaconRegion(region)
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
+    print("Exited region: \(region.identifier)")
+    delegate?.didExitBeaconRegion(region)
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, monitoringDidFailFor region: CLRegion?, withError error: Error) {
+    print("Monitoring failed for region: \(region?.identifier ?? "unknown region") with error: \(error)")
+  }
+  
+  public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    print("Location manager failed with error: \(error)")
+  }
 }
-
