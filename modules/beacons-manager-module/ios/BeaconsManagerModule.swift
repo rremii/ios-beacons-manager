@@ -1,7 +1,7 @@
 import ExpoModulesCore
-import CoreLocation
 
-//https://www.npmjs.com/package/react-native-ibeacon
+
+
 public class BeaconsManagerModule: Module,BeaconManagerDelegate {
   // See https://docs.expo.dev/modules/module-api for more details about available components.
   public func definition() -> ModuleDefinition {
@@ -11,24 +11,38 @@ public class BeaconsManagerModule: Module,BeaconManagerDelegate {
       "onInitialize",
       "didEnterBeaconRegion",
       "didFindBeacon",
+      "didLoseBeacon",
       "didExitBeaconRegion"
     )
 
     AsyncFunction("initialize") {
       
-      
-        // BeaconManager.sharedInstance.startMonitoringBeacons()
-        BeaconManager.sharedInstance.delegate = self
+//        let beaconManager = BeaconManager()
+        
+        BeaconManager.sharedInsstance.startMonitoringBeacons()
+        
+//        beaconManager.delegate = self
         
       
         self.sendEvent("onInitialize", ["message": "Module initialized"])
     }
       
+    OnCreate {
+        BeaconManager.sharedInsstance.delegate = self
+       
+    }
+      
   }
+    
+
         
+    
+    
+    
+    
 
     
-  @objc func didEnterBeaconRegion(_ region: CLRegion) {
+  @objc func didEnterBeaconRegion(_ region: CLBeaconRegion) {
     sendEvent("didEnterBeaconRegion", ["message": region])
 
     print("Inside region")
@@ -40,7 +54,13 @@ public class BeaconsManagerModule: Module,BeaconManagerDelegate {
     print("Found beacon")
   }
   
-  @objc func didExitBeaconRegion(_ region: CLRegion) {
+  @objc func didLoseBeacon(_ beaconId: String) {
+    sendEvent("didLoseBeacon", ["message": beaconId])
+
+    print("Lost beacon")
+  }
+  
+  @objc func didExitBeaconRegion(_ region: CLBeaconRegion) {
     sendEvent("didExitBeaconRegion", ["message": region])
 
     print("Outside region")

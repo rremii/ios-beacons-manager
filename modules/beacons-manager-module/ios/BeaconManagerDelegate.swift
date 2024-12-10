@@ -10,7 +10,8 @@ import Foundation
 import CoreLocation
 
 protocol BeaconManagerDelegate {    
-    func didEnterBeaconRegion(_ region: CLRegion)
+    func didEnterBeaconRegion(_ region: CLBeaconRegion)
     func didFindBeacon(_ beaconId: String)
-    func didExitBeaconRegion(_ region: CLRegion)
+    func didLoseBeacon(_ beaconId: String)
+    func didExitBeaconRegion(_ region: CLBeaconRegion)
 }

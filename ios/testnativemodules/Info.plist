@@ -49,6 +49,8 @@
     <string>Allow Zipp to use your location</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>Allow Zipp to use your location</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Allow Zipp to use your location</string>
     <key>NSUserActivityTypes</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
@@ -56,6 +58,13 @@
     <key>UIBackgroundModes</key>
     <array>
       <string>location</string>
+      <string>nearby-interaction</string>
+      <string>bluetooth-central</string>
+      <string>fetch</string>
+      <string>bluetooth-peripheral</string>
+      <string>external-accessory</string>
+      <string>processing</string>
+      <string>remote-notification</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

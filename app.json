@@ -12,7 +12,16 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.remii.test-native-modules",
       "infoPlist": {
-        "UIBackgroundModes": ["location", "nearby-interaction"],
+        "UIBackgroundModes": [
+          "location",
+          "nearby-interaction",
+          "bluetooth-central",
+          "fetch",
+          "bluetooth-peripheral",
+          "external-accessory",
+          "processing",
+          "remote-notification"
+        ],
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Zipp to use your location",
         "NSLocationAlwaysUsageDescription": "Allow Zipp to use your location",
         "NSLocationWhenInUseUsageDescription": "Allow Zipp to use your location"
