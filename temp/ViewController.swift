@@ -24,7 +24,6 @@ class ViewController: UIViewController, BeaconManagerDelegate, UNUserNotificatio
         BeaconManager.sharedInstance.delegate = self
         
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-            
         }
     }
 

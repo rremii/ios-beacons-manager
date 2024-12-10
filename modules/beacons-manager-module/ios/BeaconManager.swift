@@ -9,9 +9,11 @@
 import Foundation
 import CoreLocation
 import UIKit
+import CoreBluetooth
 
 
-class BeaconManager: NSObject, CLLocationManagerDelegate {
+
+class BeaconManager: NSObject, CLLocationManagerDelegate,UNUserNotificationCenterDelegate {
     
     static var sharedInsstance = BeaconManager()
 
@@ -31,9 +33,12 @@ class BeaconManager: NSObject, CLLocationManagerDelegate {
     var delegate: BeaconManagerDelegate?
     
     override init() {
-            
-        locationManager = CLLocationManager()
+        
 
+        locationManager = CLLocationManager()
+        
+        
+        
         let beaconConstraint = CLBeaconIdentityConstraint(uuid: UUID(uuidString: AppConstants.beaconUuid)!)
         region = CLBeaconRegion(beaconIdentityConstraint: beaconConstraint, identifier: AppConstants.beaconIdentifier)
             
@@ -45,6 +50,12 @@ class BeaconManager: NSObject, CLLocationManagerDelegate {
         locationManager.requestAlwaysAuthorization()
         locationManager.allowsBackgroundLocationUpdates = true
             
+
+        UNUserNotificationCenter.current().delegate = self
+            
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+        }
+
         
         region.notifyOnEntry = true
         region.notifyOnExit = true
@@ -64,18 +75,47 @@ class BeaconManager: NSObject, CLLocationManagerDelegate {
         locationManager.startRangingBeacons(in: region)
         locationManager.startRangingBeacons(satisfying: beaconConstraint)
         
-        
+        print("ARE BEACONS AVAILABLE")
+        print(CLLocationManager.isRangingAvailable())
+    
+    
         
         locationManager.requestState(for: region)
         locationManager.startUpdatingLocation()
         
         isMonitoringBeacons = true
     }
+    
+    
+    //////////////////////
+//    func startMonitoringBeaconsWithDelay() {
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//            self.startMonitoringBeacons()
+//        }
+//    }
+//    
+//    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+//        print("NOTIFICATION")
+//        print(response)
+//            
+//    }
+    ////////////////
+
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         print("didUpdateLocations")
   
         
         print(locations)
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.1, repeats: false)
+        let content = UNMutableNotificationContent()
+        content.title = "Parcel for Veemarkt 168"
+        content.body = "Check delivery note or contact resident"
+        content.sound = UNNotificationSound.default
+        let noti = UNNotificationRequest(identifier: "com.zippalert.deliveryalert", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(noti, withCompletionHandler: nil)
+                
     }
     
     func stopMonitoringBeacons() {
